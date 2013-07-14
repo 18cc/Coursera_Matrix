@@ -1,3 +1,5 @@
+from symbol import return_stmt
+
 voting_data = list(open("voting_record_dump109.txt"))
 
 ## Task 1
@@ -28,7 +30,15 @@ def create_voting_dict():
 
     The lists for each senator should preserve the order listed in voting data. 
     """
-    return dict() 
+    temp = dict()
+    for record in voting_data:
+        items = list(record.split())
+        name = items[0]
+        values=[]
+        for i in range(3,len(items)):
+           values.append(int(items[i]))
+        temp[name]=values
+    return temp
     
 
 ## Task 2
@@ -44,7 +54,7 @@ def policy_compare(sen_a, sen_b, voting_dict):
         >>> policy_compare('Fox-Epstein','Ravella', voting_dict)
         -2
     """
-    return 0.0
+    return sum([i*j for i,j in zip(voting_dict[sen_a], voting_dict[sen_b])])
 
 
 ## Task 3
@@ -63,8 +73,16 @@ def most_similar(sen, voting_dict):
 
     Note that you can (and are encouraged to) re-use you policy_compare procedure.
     """
-    
-    return ""
+    max_sum =  float("-inf")
+    name = ""
+    for sen_name in voting_dict.keys():
+        if sen_name == sen: continue
+        else:
+            my_sum = policy_compare(sen,sen_name,voting_dict)
+            if my_sum > max_sum:
+               max_sum = my_sum
+               name = sen_name
+    return name
     
 
 ## Task 4
@@ -80,14 +98,25 @@ def least_similar(sen, voting_dict):
         >>> least_similar('Klein', vd)
         'Ravella'
     """
-    return ""
+    min_sum =  float("inf")
+    name = ""
+    for sen_name in voting_dict.keys():
+      if sen_name == sen: continue
+      else:
+         my_sum = policy_compare(sen,sen_name,voting_dict)
+         if my_sum < min_sum:
+            min_sum = my_sum
+            name = sen_name
+    return name
+
+
     
     
 
 ## Task 5
-
-most_like_chafee    = ''
-least_like_santorum = '' 
+voting_dict = create_voting_dict()
+most_like_chafee    = most_similar("Chafee",voting_dict)
+least_like_santorum = least_similar("Santorum",voting_dict)
 
 
 
@@ -102,7 +131,9 @@ def find_average_similarity(sen, sen_set, voting_dict):
         >>> find_average_similarity('Klein', {'Fox-Epstein','Ravella'}, vd)
         -0.5
     """
-    return ...
+    return  sum([policy_compare(sen,sen_i,voting_dict)  for sen_i in sen_set])/len(sen_set)
+
+
 
 most_average_Democrat = ... # give the last name (or code that computes the last name)
 
@@ -119,9 +150,32 @@ def find_average_record(sen_set, voting_dict):
         >>> find_average_record({'Fox-Epstein','Ravella'}, voting_dict)
         [-0.5, -0.5, 0.0]
     """
-    return ...
+    sen_set = list(sen_set)
+    if len(sen_set) == 0 : return  []
+    if len(sen_set) == 0 : return  voting_dict[sen_set[0]]
+    sumvec = voting_dict[sen_set[0]]
+    for i in range(1,len(sen_set)):
+        for i,val in enumerate(voting_dict[sen_set[i]]):
+           sumvec[i] += val
+    for i,val in enumerate(sumvec):
+       sumvec[i] /= len(sen_set)
+    return sumvec
 
-average_Democrat_record = ... # (give the vector)
+
+def create_democrat_dict():
+    temp = dict()
+    for record in voting_data:
+        items = list(record.split())
+        if items[1] != 'D': continue
+        name = items[0]
+        values=[]
+        for i in range(3,len(items)):
+           values.append(int(items[i]))
+        temp[name]=values
+    return temp
+
+democrat = create_democrat_dict()
+average_Democrat_record = find_average_record(set(democrat.keys()),democrat)
 
 
 # Task 8
@@ -137,5 +191,18 @@ def bitter_rivals(voting_dict):
         >>> bitter_rivals(voting_dict)
         ('Fox-Epstein', 'Ravella')
     """
-    return (..., ...)
+    min_sum =  float("inf")
+    rivals = ("","")
+    voters_length  = len(voting_dict.keys())
+    voters = list(voting_dict.keys())
+    for i in range(0,voters_length):
+      for j in range(i + 1,voters_length):
+         my_sum = policy_compare(voters[i],voters[j],voting_dict)
+         if my_sum < min_sum:
+             min_sum = my_sum
+             rivals =(voters[i],voters[j])
+    return rivals
 
+if __name__ == '__main__':
+   t = find_average_record({"DeMint","Cornyn"},voting_dict)
+   print(t)

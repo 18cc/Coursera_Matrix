@@ -81,6 +81,7 @@ k = 'Bilbo'
 value_list_modified_1 = [x[k]  if k in x else 'NOT PRESENT'  for x in dlist] # <-- Use the same expression here
 k = 'Frodo'
 value_list_modified_2 = [x[k]  if k in x else 'NOT PRESENT'  for x in dlist] # <-- as you do here
+value_list_modified_2 = [x[k]  if k in x else 'NOT PRESENT'  for x in dlist]
 
 ## Task 23
 square_dict =  { k:k*k for k in range(100) }
